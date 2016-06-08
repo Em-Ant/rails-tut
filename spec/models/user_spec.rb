@@ -101,4 +101,14 @@ describe User do
     before { @user.password = @user.password_confirmation = "a" * 5 }
     it { should be_invalid}
   end
+
+  describe "remember user" do
+    before { @user.remember }
+    it { expect(@user.remember_token).not_to be_blank }
+  end
+
+  describe "forget user" do
+    before { @user.forget }
+    it { expect(@user.remember_token).to be_blank }
+  end
 end
