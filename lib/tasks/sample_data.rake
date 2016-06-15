@@ -1,3 +1,5 @@
+# Populate db task : Use 'rake db:populate'
+
 namespace :db do
   desc "Fill database with sample data"
   task populate: :environment do
@@ -5,7 +7,9 @@ namespace :db do
                  email: "example@railstutorial.org",
                  password: "foobar",
                  password_confirmation: "foobar",
-                 admin: true)
+                 admin: true,
+                 activated: true,
+                 activated_at: Time.zone.now)
     99.times do |n|
       name  = Faker::Name.name
       email = "example-#{n+1}@railstutorial.org"
@@ -13,7 +17,9 @@ namespace :db do
       User.create!(name: name,
                    email: email,
                    password: password,
-                   password_confirmation: password)
+                   password_confirmation: password,
+                   activated: true,
+                   activated_at: Time.zone.now)
     end
   end
 end
