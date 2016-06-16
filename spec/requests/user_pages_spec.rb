@@ -128,6 +128,86 @@ describe "User pages" do
     end
   end
 
+  describe "password_reset" do
+    let(:user) { FactoryGirl.create(:user) }
+    before do
+      clear_emails
+      visit new_password_reset_path
+    end
+
+    describe "with valid email" do
+      before do
+        fill_in "Email", with: user.email
+        click_button "Submit"
+      end
+      it "should redirect to homepage" do
+        expect(page).to have_link('Sign in')
+        expect(page).to have_selector("h1", text: "Welcome to the Sample App")
+      end
+      it "should show an Info alert" do
+        expect(page).to have_selector('div.alert.alert-info', text: 'Email sent with password reset instructions')
+      end
+      describe "when using a wrong reset link" do
+        before { visit edit_password_reset_url('wrong_token', email: user.email) }
+        it "should redirect to root url" do
+          expect(page).to have_link('Sign in')
+          expect(page).to have_selector("h1", text: "Welcome to the Sample App")
+        end
+      end
+      describe "after clicking the correct activation link" do
+        before do
+          open_email(user.email)
+          current_email.click_link 'Reset password'
+        end
+        it { should have_link('Sign in') }
+        it { should have_selector("h1", text: "Reset password") }
+        describe "with new password and matching confirmation" do
+          before do
+            @digest_before = User.find_by(email: user.email).password_digest
+            fill_in "Password",     with: "new_pwd"
+            fill_in "Confirmation", with: "new_pwd"
+            click_button "Update password"
+          end
+          # Log in user, redirect to user's page, and show success alert
+          it { should have_link('Sign out') }
+          it { should have_title(user.name) }
+          it { should have_selector('h1', text: user.name) }
+          it { should have_selector('div.alert.alert-success', text: 'Password has been reset.') }
+
+          # Password changed
+          let(:digest_after) { User.find_by(email: user.email).password_digest }
+          specify { expect(digest_after).not_to eq(@digest_before) }
+        end
+        describe "with invalid data" do
+          before do
+            @digest_before = User.find_by(email: user.email).password_digest
+            fill_in "Password",     with: "new_pwd"
+            fill_in "Confirmation", with: "unmatched"
+            click_button "Update password"
+          end
+          # Redirect to reset password, and show errors alert
+          it { should have_link('Sign in') }
+          it { should have_selector('h1', text: "Reset password") }
+          it { should have_selector('div.alert.alert-danger', text: 'The form contains 1 error.') }
+
+          # Password not changed
+          let(:digest_after) { User.find_by(email: user.email).password_digest }
+          specify { expect(digest_after).to eq(@digest_before) }
+        end
+      end
+    end
+    describe "with invalid email" do
+      before do
+        fill_in "Email", with: "invalid_email@test.cxm"
+        click_button "Submit"
+      end
+      # Redirect to forgot password, and show error alert
+      it { should have_link('Sign in') }
+      it { should have_selector('h1', text: "Forgot password") }
+      it { should have_selector('div.alert.alert-danger', text: 'Email address not found') }
+    end
+  end
+
   describe "edit" do
     let(:user) { FactoryGirl.create(:user) }
     before do

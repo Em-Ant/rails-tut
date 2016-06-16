@@ -13,6 +13,8 @@
 #  activation_digest :string
 #  activated         :boolean          default(FALSE)
 #  activated_at      :datetime
+#  reset_digest      :string
+#  reset_sent_at     :datetime
 #
 
 require 'rails_helper'
@@ -37,6 +39,8 @@ describe User do
   it { should respond_to(:activated_at) }
   it { should respond_to(:activation_digest) }
   it { should respond_to(:remember_digest) }
+  it { should respond_to(:reset_digest) }
+  it { should respond_to(:reset_sent_at) }
   it { should be_valid }
   it { should_not be_admin }
 
@@ -135,16 +139,41 @@ describe User do
     it { expect(@user.authenticated?(:remember, @user.remember_token)).to be(false) }
   end
 
-  describe "before activation" do
-    before { @user.save! }
-    it { should_not be_activated }
-    it "should have the correct activation digest and token" do
-      expect(@user.authenticated?(:activation, @user.activation_token)).to be(true)
+  describe "account activation" do
+    describe "before activation" do
+      before { @user.save! }
+      it { should_not be_activated }
+      it "should have the correct activation digest and token" do
+        expect(@user.authenticated?(:activation, @user.activation_token)).to be(true)
+      end
+    end
+
+    describe "after activation" do
+      before { @user.activate }
+      it { should be_activated }
+      it 'sends an email' do
+        expect { @user.send_activation_email }
+          .to change { ActionMailer::Base.deliveries.count }.by(1)
+      end
     end
   end
 
-  describe "after activation" do
-    before { @user.activate }
-    it { should be_activated }
+  describe "password reset" do
+    describe "before reset" do
+     specify { expect(@user.reset_token).to be_nil }
+     specify { expect(@user.reset_digest).to be_nil }
+    end
+    describe "after reset" do
+      before { @user.create_reset_digest }
+      specify { expect(@user.reset_token).not_to be_nil }
+      specify { expect(@user.reset_digest).not_to be_nil }
+      specify { expect(@user.authenticated?(:reset, @user.reset_token)).to be(true) }
+      specify { expect(@user.password_reset_expired?).to be(false) }
+      it 'sends an email' do
+        expect { @user.send_password_reset_email }
+          .to change { ActionMailer::Base.deliveries.count }.by(1)
+      end
+    end
+
   end
 end
