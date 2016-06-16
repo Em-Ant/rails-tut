@@ -27,6 +27,10 @@ describe User do
   it { should respond_to(:password_confirmation) }
   it { should respond_to(:authenticate) }
   it { should respond_to(:admin) }
+  it { should respond_to(:activated) }
+  it { should respond_to(:activated_at) }
+  it { should respond_to(:activation_digest) }
+  it { should respond_to(:remember_digest) }
   it { should be_valid }
   it { should_not be_admin }
 
@@ -116,10 +120,20 @@ describe User do
   describe "remember user" do
     before { @user.remember }
     it { expect(@user.remember_token).not_to be_blank }
+    it { expect(@user.authenticated?(:remember, @user.remember_token)).to be(true) }
   end
 
   describe "forget user" do
     before { @user.forget }
     it { expect(@user.remember_token).to be_blank }
+    it { expect(@user.authenticated?(:remember, @user.remember_token)).to be(false) }
+  end
+
+  describe "before activation" do
+    before { @user.save! }
+    it { should_not be_activated }
+    it "should have the correct activation digest and token" do
+      expect(@user.authenticated?(:activation, @user.activation_token)).to be(true)
+    end
   end
 end
