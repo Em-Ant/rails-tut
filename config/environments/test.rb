@@ -41,6 +41,8 @@ Rails.application.configure do
   # config.action_view.raise_on_missing_translations = true
 
   # Speed up tests by lowering BCrypt's cost function.
+  host = 'localhost:3000'
+  config.action_mailer.default_url_options = { host: host, protocol: 'https' }
   require 'bcrypt'
   silence_warnings do
     BCrypt::Engine::DEFAULT_COST = BCrypt::Engine::MIN_COST

@@ -83,9 +83,22 @@ describe "User pages" do
         before { click_button submit }
         let(:user) { User.find_by(email: 'user@example.com') }
 
-        it { should have_link('Sign out') }
-        it { should have_title(user.name) }
-        it { should have_selector('div.alert.alert-success', text: 'Welcome') }
+        it "should redirect to homepage" do
+          expect(page).to have_link('Sign in')
+          expect(page).to have_selector("h1", text: "Welcome to the Sample App")
+        end
+        it "should show info about activation email" do
+          expect(page).to have_selector('div.alert.alert-info',
+            text: 'Please check your email to activate your account')
+        end
+
+        specify "user should not be activated" do
+          expect(user.activated?).to be(false)
+        end
+      end
+
+      describe "after clicking activation link" do
+        pending "should activate user and log in"
       end
     end
   end
