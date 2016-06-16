@@ -56,7 +56,10 @@ describe "User pages" do
   end
 
   describe "signup" do
-    before { visit signup_path }
+    before do
+      clear_emails
+      visit signup_path
+    end
     let(:submit) { "Create my account" }
 
     it { should have_selector('h1', :text => 'Sign up') }
@@ -95,10 +98,32 @@ describe "User pages" do
         specify "user should not be activated" do
           expect(user.activated?).to be(false)
         end
-      end
 
-      describe "after clicking activation link" do
-        pending "should activate user and log in"
+        describe "when using a wrong activation link" do
+          before { visit edit_account_activation_url('wrong_token', email: user.email) }
+          it "should redirect to root url" do
+            expect(page).to have_link('Sign in')
+            expect(page).to have_selector("h1", text: "Welcome to the Sample App")
+          end
+          it "should show an Error alert" do
+            expect(page).to have_selector('div.alert.alert-danger', text: 'Invalid activation link')
+          end
+        end
+
+        describe "after clicking the correct activation link" do
+          before do
+            open_email(user.email)
+            current_email.click_link 'Activate'
+          end
+          it "should redirect to the user's page" do
+            expect(page).to have_link('Sign out')
+            expect(page).to have_title(user.name)
+            expect(page).to have_selector('h1', text: user.name)
+          end
+          it "should show a Success alert" do
+            expect(page).to have_selector('div.alert.alert-success', text: 'Account activated!')
+          end
+        end
       end
     end
   end

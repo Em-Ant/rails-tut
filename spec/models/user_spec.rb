@@ -2,11 +2,17 @@
 #
 # Table name: users
 #
-#  id         :integer          not null, primary key
-#  name       :string
-#  email      :string
-#  created_at :datetime         not null
-#  updated_at :datetime         not null
+#  id                :integer          not null, primary key
+#  name              :string
+#  email             :string
+#  created_at        :datetime         not null
+#  updated_at        :datetime         not null
+#  password_digest   :string
+#  remember_digest   :string
+#  admin             :boolean          default(FALSE)
+#  activation_digest :string
+#  activated         :boolean          default(FALSE)
+#  activated_at      :datetime
 #
 
 require 'rails_helper'
@@ -135,5 +141,10 @@ describe User do
     it "should have the correct activation digest and token" do
       expect(@user.authenticated?(:activation, @user.activation_token)).to be(true)
     end
+  end
+
+  describe "after activation" do
+    before { @user.activate }
+    it { should be_activated }
   end
 end

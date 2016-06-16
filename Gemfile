@@ -53,6 +53,7 @@ group :test do
   gem 'selenium-webdriver'
   gem 'capybara'
   gem 'factory_girl_rails'
+  gem 'capybara-email'
 end
 group :development do
   # Access an IRB console on exception pages or by using <%= console %> in views
