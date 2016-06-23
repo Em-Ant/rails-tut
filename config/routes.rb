@@ -4,6 +4,7 @@ Rails.application.routes.draw do
   resources :sessions, only: [:new, :create, :destroy]
   resources :account_activations, only: [:edit]
   resources :password_resets, only: [:new, :edit, :create, :update]
+  resources :microposts, only: [:create, :destroy]
 
   root to: 'static_pages#home'
   match '/about',     to: 'static_pages#about',   via: :get

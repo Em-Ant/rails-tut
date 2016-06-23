@@ -14,4 +14,9 @@ FactoryGirl.define do
       activated false
     end
   end
+
+  factory :micropost do
+    user
+    content "Lorem ipsum"
+  end
 end
