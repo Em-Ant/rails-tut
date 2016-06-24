@@ -37,12 +37,19 @@ describe User do
   it { should respond_to(:admin) }
   it { should respond_to(:microposts) }
   it { should respond_to(:feed) }
+  it { should respond_to(:active_relationships) }
+  it { should respond_to(:passive_relationships) }
+  it { should respond_to(:following) }
+  it { should respond_to(:followers) }
   it { should respond_to(:activated) }
   it { should respond_to(:activated_at) }
   it { should respond_to(:activation_digest) }
   it { should respond_to(:remember_digest) }
   it { should respond_to(:reset_digest) }
   it { should respond_to(:reset_sent_at) }
+  it { should respond_to(:following?) }
+  it { should respond_to(:follow) }
+  it { should respond_to(:unfollow) }
   it { should be_valid }
   it { should_not be_admin }
 
@@ -210,6 +217,27 @@ describe User do
       microposts.each do |micropost|
         expect(Micropost.where(id: micropost.id)).to be_empty
       end
+    end
+  end
+
+  describe "following" do
+    let(:other_user) { FactoryGirl.create(:user) }
+    before do
+      @user.save
+      @user.follow(other_user)
+    end
+
+    it { should be_following(other_user) }
+    specify { expect(@user.following).to include(other_user) }
+
+    describe "followed user" do
+      specify { expect(other_user.followers).to include(@user) }
+    end
+    describe "and unfollowing" do
+      before { @user.unfollow(other_user) }
+
+      it { should_not be_following(other_user) }
+      specify { expect(@user.following).to_not include(other_user) }
     end
   end
 end

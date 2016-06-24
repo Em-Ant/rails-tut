@@ -22,7 +22,6 @@ describe "Authentication" do
         sign_in user
         user.save
       end
-      it { should have_title(user.name) }
       it { should have_link('Profile',     href: user_path(user)) }
       it { should have_link('Sign out',    href: signout_path) }
       it { should have_link('Users',       href: users_path) }
@@ -47,6 +46,16 @@ describe "Authentication" do
       let(:user) { FactoryGirl.create(:user) }
 
       describe "in the Users controller" do
+
+        describe "visiting the following page" do
+          before { visit following_user_path(user) }
+          it { should have_title('Sign in') }
+        end
+
+        describe "visiting the followers page" do
+          before { visit followers_user_path(user) }
+          it { should have_title('Sign in') }
+        end
 
         describe "visiting the edit page" do
           before { visit edit_user_path(user) }
