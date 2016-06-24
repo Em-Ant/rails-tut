@@ -204,10 +204,21 @@ describe User do
       let(:unfollowed_post) do
         FactoryGirl.create(:micropost, user: FactoryGirl.create(:user))
       end
+      let(:followed_user) { FactoryGirl.create(:user) }
+
+      before do
+        @user.follow(followed_user)
+        3.times { followed_user.microposts.create!(content: "Lorem ipsum") }
+      end
 
       specify { expect(@user.feed).to include(newer_micropost) }
       specify { expect(@user.feed).to include(older_micropost) }
       specify { expect(@user.feed).to_not include(unfollowed_post) }
+      specify do
+        followed_user.microposts.each do |micropost|
+          expect(@user.feed).to include(micropost)
+        end
+      end
     end
 
     it "should destroy associated microposts" do
